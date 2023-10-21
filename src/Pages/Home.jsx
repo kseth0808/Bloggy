@@ -1,47 +1,91 @@
-import { collection, doc, getDocs, deleteDoc } from 'firebase/firestore'
-import React, { useEffect, useState } from 'react'
-import { db } from '../Firebase'
+import React, { useEffect, useState } from 'react';
+import { collection, doc, getDocs, deleteDoc } from 'firebase/firestore';
+import { db } from '../Firebase';
+import TopBlogs from './TopBlogs';
 
 function Home() {
-  const[postList, setpostList] = useState([])
-  const postCollectionRef = collection(db, "posts")
-  useEffect(()=>{
-   const getPosts = async ()=>{
-    const data = await getDocs(postCollectionRef);
-    setpostList(data.docs.map((doc)=> ({...doc.data(), id: doc.id})));
-   }
-   getPosts();
-  },[])
+  const [postList, setpostList] = useState([]);
+  const postCollectionRef = collection(db, "posts");
 
-  const deletePost = async (id) => {
-    const postDoc = doc(db, "posts", id);
-    await deleteDoc(postDoc);
-  }
-  
+  useEffect(()=>{
+    const getPosts = async ()=>{
+     const data = await getDocs(postCollectionRef);
+     setpostList(data.docs.map((doc)=> ({...doc.data(), id: doc.id})));
+    }
+    getPosts();
+   },[])
+ 
+   const deletePost = async (id) => {
+     const postDoc = doc(db, "posts", id);
+     await deleteDoc(postDoc);
+   }
+  // ... (your existing code for fetching and deleting posts)
+
+  const homePageStyle = {
+    textAlign: 'center',
+    margin: '20px',
+  };
+
+  const postStyle = {
+    border: '1px solid #ccc',
+    margin: '20px',
+    padding: '10px',
+    backgroundColor: '#f8f8f8',
+    boxShadow: '0 0 5px rgba(0, 0, 0, 0.2)',
+  };
+
+  const postHeaderStyle = {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  };
+
+  const titleStyle = {
+    flex: 1,
+  };
+
+  const deleteButtonStyle = {
+    backgroundColor: '#ff6b6b',
+    color: 'white',
+    border: 'none',
+    padding: '5px 10px',
+    cursor: 'pointer',
+    transition: 'background-color 0.3s',
+  };
+
+  const postContentStyle = {
+    marginTop: '10px',
+  };
+
+  const authorStyle = {
+    fontStyle: 'italic',
+    color: '#555',
+  };
 
   return (
-    <div className="homePage">
-      <h1>Hello This is Blog App, Here you can write blogs that will display on homepage</h1>
-      {postList.map((posts)=>{
-        return(
-          <div className="post">
-            <div className="postHeader">
-              <div className="title">
-                <h1>{posts.title}</h1>
-              </div>
-              <div className="deletePost">
-                  <button onClick={()=> deletePost(posts.id)}>Delete</button>
-                </div>
+    <div style={homePageStyle} className="homePage">
+      <h1>Hello, This is a Blog App. Write and Share Your Blogs!</h1>
+      <TopBlogs topBlogs={postList} />
+      {postList.map((post) => (
+        <div style={postStyle} key={post.id}>
+          <div style={postHeaderStyle} className="postHeader">
+            <div style={titleStyle} className="title">
+              <h1>{post.title}</h1>
             </div>
-            <div className="title">
-              <h3>{posts.posttext}</h3>
-              <h3>@{posts.author.name}</h3>
+            <div className="deletePost">
+              <button style={deleteButtonStyle} onClick={() => deletePost(post.id)}>
+                Delete
+              </button>
             </div>
-            </div>
-        )
-      })}
+          </div>
+          <div style={postContentStyle} className="postContent">
+            <p>{post.posttext}</p>
+            <p style={authorStyle}>@{post.author.name}</p>
+          </div>
+        </div>
+      ))}
     </div>
-  )
+  );
 }
 
-export default Home
+export default Home;
